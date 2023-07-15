@@ -1,5 +1,6 @@
-﻿using Gamex.Program;
-using OpenTK.Graphics.ES20;
+﻿using Gamex.Loader;
+using Gamex.Program;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -16,6 +17,7 @@ public class Game : GameWindow
     };
     
     private GlProgram? _program;
+    private int _vertexArrayObject;
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title })
@@ -45,6 +47,15 @@ public class Game : GameWindow
             .AttachVertex(vShader)
             .AttachFragment(fShader)
             .Build();
+        
+        var vbo = new VertexBuffer();
+        vbo.SetStaticData(vertices);
+        
+        _vertexArrayObject = GL.GenVertexArray();
+        GL.BindVertexArray(_vertexArrayObject);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        GL.EnableVertexAttribArray(0);
+        _program.UseProgram();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -61,6 +72,9 @@ public class Game : GameWindow
     {
         base.OnRenderFrame(args);
         GL.Clear(ClearBufferMask.ColorBufferBit);
+        _program?.UseProgram();
+        GL.BindVertexArray(_vertexArrayObject);
+        GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
         SwapBuffers();
     }
     
