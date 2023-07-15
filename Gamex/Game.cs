@@ -14,9 +14,8 @@ public class Game : GameWindow
         0.5f, -0.5f, 0.0f, //Bottom-right vertex
         0.0f,  0.5f, 0.0f  //Top vertex
     };
-
-    private VertexShader _vShader = new();
-    private FragmentShader _fShader = new();
+    
+    private GlProgram? _program;
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title })
@@ -27,17 +26,25 @@ public class Game : GameWindow
     {
         base.OnLoad();
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-        if (!_vShader.Compile("position.vert"))
+        
+        var vShader = new VertexShader();
+        if (!vShader.Compile("position.vert"))
         {
-            Console.Error.WriteLine(_vShader.InfoLog);
+            Console.Error.WriteLine(vShader.InfoLog);
             return;
         }
 
-        if (!_fShader.Compile("color.frag"))
+        var fShader = new FragmentShader();
+        if (!fShader.Compile("color.frag"))
         {
-            Console.Error.WriteLine(_fShader.InfoLog);
+            Console.Error.WriteLine(fShader.InfoLog);
+            return;
         }
+        
+        _program = new GlProgramBuilder()
+            .AttachVertex(vShader)
+            .AttachFragment(fShader)
+            .Build();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -67,7 +74,6 @@ public class Game : GameWindow
     protected override void OnUnload()
     {
         base.OnUnload();
-        _vShader.Dispose();
-        _fShader.Dispose();
+        _program?.Dispose();
     }
 }

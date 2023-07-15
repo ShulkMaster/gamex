@@ -6,7 +6,7 @@ public abstract class Shader: IDisposable
 {
     private const string ShaderDir = "shaders";
     private readonly ShaderType _type;
-    private int _handle;
+    private readonly int _handle;
     private bool _disposed;
 
     public string InfoLog { get; private set; } = string.Empty;
@@ -14,6 +14,7 @@ public abstract class Shader: IDisposable
     protected Shader(ShaderType type)
     {
         _type = type;
+        _handle = GL.CreateShader(_type);
     }
     
     ~Shader()
@@ -36,12 +37,13 @@ public abstract class Shader: IDisposable
 
         return Path.Combine(ShaderDir, shaderKind, fileName);
     }
+    
+    public int GetHandle() => _handle;
 
     public bool Compile(string filaName)
     {
         string path = GetShaderPath(filaName);
         string source = File.ReadAllText(path);
-        _handle = GL.CreateShader(_type);
         GL.ShaderSource(_handle, source);
         GL.CompileShader(_handle);
         GL.GetShader(_handle, ShaderParameter.CompileStatus, out int status);
