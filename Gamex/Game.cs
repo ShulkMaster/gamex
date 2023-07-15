@@ -7,6 +7,13 @@ namespace Gamex;
 
 public class Game : GameWindow
 {
+    
+    private readonly float[] vertices = {
+        -0.5f, -0.5f, 0.0f, //Bottom-left vertex
+        0.5f, -0.5f, 0.0f, //Bottom-right vertex
+        0.0f,  0.5f, 0.0f  //Top vertex
+    };
+
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title })
     {

@@ -11,4 +11,14 @@
       <PackageReference Include="OpenTK" Version="4.7.7" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="shaders\**">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Loader" />
+    </ItemGroup>
+
 </Project>
