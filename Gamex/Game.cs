@@ -28,7 +28,8 @@ public class Game : GameWindow
     {
         base.OnLoad();
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        
+        var loader = new AssetLoader("Fox");
+        loader.Load();
         var vShader = new VertexShader();
         if (!vShader.Compile("position.vert"))
         {
@@ -55,6 +56,7 @@ public class Game : GameWindow
         GL.BindVertexArray(_vertexArrayObject);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
         GL.EnableVertexAttribArray(0);
+        GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
         _program.UseProgram();
     }
 

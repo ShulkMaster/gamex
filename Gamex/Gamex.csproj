@@ -8,14 +8,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CjClutter.ObjLoader" Version="1.0.0" />
-      <PackageReference Include="OpenTK" Version="4.7.7" />
+        <PackageReference Include="CjClutter.ObjLoader" Version="1.0.0" />
+        <PackageReference Include="OpenTK" Version="4.7.7" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="shaders\**">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="shaders\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="DataObjects\" />
     </ItemGroup>
 
 </Project>
