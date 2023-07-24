@@ -5,6 +5,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OpenTK.Mathematics;
 
 namespace Gamex;
 
@@ -14,6 +15,11 @@ public class Game : GameWindow
     private int _vertexArrayObject;
     private int _elementBufferObject;
     private int faceCount;
+    private int _rotationMatrixLocation;
+    
+    private float _rotationX = 0;
+    private float _rotationY = 0;
+    private float _rotationZ = 0;
     
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title })
@@ -54,7 +60,7 @@ public class Game : GameWindow
         GL.VertexAttribPointer(0, pack.Size, pack.PointerType, false, pack.stride, 0);
         GL.EnableVertexAttribArray(0);
         
-        GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+        //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         uint[] indices = pack.Indices;
         faceCount = indices.Length;
@@ -62,6 +68,7 @@ public class Game : GameWindow
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
         GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
         _program.UseProgram();
+        _rotationMatrixLocation = _program.FindUniform("rotationMatrix");
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -72,6 +79,21 @@ public class Game : GameWindow
         {
             Close();
         }
+
+        const float clamp = 6.28f;
+        float temp = MouseState.ScrollDelta.Length * 0.0174533f / 10;
+        _rotationX = Math.Clamp(temp, -clamp, clamp);
+
+        if (MouseState.IsButtonDown(MouseButton.Left))
+        {
+            _rotationY += 0.0174533f / 10 * MouseState.Delta.X;
+            _rotationY = Math.Clamp(_rotationY, -clamp, clamp);
+            
+            _rotationZ += 0.0174533f / 10 * MouseState.Delta.Y;
+            _rotationZ = Math.Clamp(_rotationZ, -clamp, clamp);
+        }
+
+        
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -79,6 +101,12 @@ public class Game : GameWindow
         base.OnRenderFrame(args);
         GL.Clear(ClearBufferMask.ColorBufferBit);
         _program?.UseProgram();
+        Matrix4 rotationMatrix = Matrix4.Identity * Matrix4.CreateRotationX(_rotationX) ;
+        rotationMatrix *= Matrix4.CreateRotationY(_rotationY);
+        rotationMatrix *= Matrix4.CreateRotationZ(_rotationZ);
+        rotationMatrix *= Matrix4.CreateScale(0.5f);
+
+        GL.UniformMatrix4(_rotationMatrixLocation, false, ref rotationMatrix);
         GL.BindVertexArray(_vertexArrayObject);
         GL.DrawElements(PrimitiveType.Triangles, faceCount, DrawElementsType.UnsignedInt, 0);
         SwapBuffers();

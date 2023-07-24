@@ -37,22 +37,20 @@ public sealed class AssetLoader : IMaterialStreamProvider
             vertices[i * 3 + 2] = vertex[i].Z;
         }
 
-        int facesLength = res.Groups.Sum(t => t.Faces.Count);
-        uint[] indices = new uint[facesLength * 3];
+        var indices = new List<uint>();
         var groups = res.Groups;
 
         foreach (Group t in groups)
         {
             Console.WriteLine("Group: {0}", t.Name);
-            for (int i = 0; i < t.Faces.Count; i++)
+            foreach (Face x in t.Faces)
             {
-                Face x = t.Faces[i];
-                indices[i * 3] = (uint) x[0].VertexIndex;
-                indices[i * 3 + 1] = (uint) x[1].VertexIndex;
-                indices[i * 3 + 2] = (uint) x[2].VertexIndex;
+                indices.Add((uint) x[0].VertexIndex);
+                indices.Add((uint) x[1].VertexIndex);
+                indices.Add((uint) x[2].VertexIndex);
             }
         }
-        return new VertexPack(vertices, indices);
+        return new VertexPack(vertices, indices.ToArray());
     }
 
     public Stream Open(string materialFilePath)

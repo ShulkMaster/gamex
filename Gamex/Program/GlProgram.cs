@@ -32,4 +32,9 @@ public sealed class GlProgram: IDisposable
         _disposed = true;
         GC.SuppressFinalize(this);
     }
+
+    public int FindUniform(string name)
+    {
+        return GL.GetUniformLocation(_handle, name);
+    }
 }
