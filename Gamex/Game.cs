@@ -1,4 +1,5 @@
-﻿using Gamex.Loader;
+﻿using Gamex.DataObjects;
+using Gamex.Loader;
 using Gamex.Program;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -9,16 +10,11 @@ namespace Gamex;
 
 public class Game : GameWindow
 {
-    
-    private readonly float[] vertices = {
-        -0.5f, -0.5f, 0.0f, //Bottom-left vertex
-        0.5f, -0.5f, 0.0f, //Bottom-right vertex
-        0.0f,  0.5f, 0.0f  //Top vertex
-    };
-    
     private GlProgram? _program;
     private int _vertexArrayObject;
-
+    private int _elementBufferObject;
+    private int faceCount;
+    
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title })
     {
@@ -29,7 +25,7 @@ public class Game : GameWindow
         base.OnLoad();
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         var loader = new AssetLoader("Fox");
-        loader.Load();
+        var stuff = loader.Load();
         var vShader = new VertexShader();
         if (!vShader.Compile("position.vert"))
         {
@@ -50,13 +46,21 @@ public class Game : GameWindow
             .Build();
         
         var vbo = new VertexBuffer();
-        vbo.SetStaticData(vertices);
+        VertexPack pack = loader.Pack(stuff);
+        vbo.SetStaticData(pack.Vertices);
         
         _vertexArrayObject = GL.GenVertexArray();
         GL.BindVertexArray(_vertexArrayObject);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, pack.Size, pack.PointerType, false, pack.stride, 0);
         GL.EnableVertexAttribArray(0);
+        
         GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+        uint[] indices = pack.Indices;
+        faceCount = indices.Length;
+        _elementBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
         _program.UseProgram();
     }
 
@@ -76,7 +80,7 @@ public class Game : GameWindow
         GL.Clear(ClearBufferMask.ColorBufferBit);
         _program?.UseProgram();
         GL.BindVertexArray(_vertexArrayObject);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        GL.DrawElements(PrimitiveType.Triangles, faceCount, DrawElementsType.UnsignedInt, 0);
         SwapBuffers();
     }
     
