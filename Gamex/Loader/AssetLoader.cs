@@ -45,9 +45,16 @@ public sealed class AssetLoader : IMaterialStreamProvider
             Console.WriteLine("Group: {0}", t.Name);
             foreach (Face x in t.Faces)
             {
-                indices.Add((uint) x[0].VertexIndex);
-                indices.Add((uint) x[1].VertexIndex);
-                indices.Add((uint) x[2].VertexIndex);
+                if (x.Count == 4)
+                {
+                   indices.Add((uint) x[0].VertexIndex - 1);
+                   indices.Add((uint) x[2].VertexIndex - 1);
+                   indices.Add((uint) x[3].VertexIndex - 1);
+                }
+
+                indices.Add((uint) x[0].VertexIndex - 1);
+                indices.Add((uint) x[1].VertexIndex - 1);
+                indices.Add((uint) x[2].VertexIndex - 1);
             }
         }
         return new VertexPack(vertices, indices.ToArray());
