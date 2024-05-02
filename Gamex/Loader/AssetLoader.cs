@@ -45,11 +45,28 @@ public sealed class AssetLoader : IMaterialStreamProvider
             Console.WriteLine("Group: {0}", t.Name);
             foreach (Face x in t.Faces)
             {
-                if (x.Count == 4)
+                if (x.Count < 3)
+                {
+                    Console.WriteLine("WTF!");
+                }
+                
+                if (x.Count > 5)
+                {
+                    Console.WriteLine("fuck you!");
+                }
+
+                if (x.Count > 3)
                 {
                    indices.Add((uint) x[0].VertexIndex - 1);
                    indices.Add((uint) x[2].VertexIndex - 1);
                    indices.Add((uint) x[3].VertexIndex - 1);
+                }
+                
+                if (x.Count > 4)
+                {
+                    indices.Add((uint) x[0].VertexIndex - 1);
+                    indices.Add((uint) x[3].VertexIndex - 1);
+                    indices.Add((uint) x[4].VertexIndex - 1);
                 }
 
                 indices.Add((uint) x[0].VertexIndex - 1);

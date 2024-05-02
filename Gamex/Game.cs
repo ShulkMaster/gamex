@@ -31,7 +31,7 @@ public class Game : GameWindow
     {
         base.OnLoad();
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        var loader = new AssetLoader("Chicken");
+        var loader = new AssetLoader("Shiba");
         var stuff = loader.Load();
         var vShader = new VertexShader();
         if (!vShader.Compile("position.vert"))
