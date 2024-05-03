@@ -13,7 +13,5 @@ public class VertexBuffer: GlBuffer
         int size = data.Length * sizeof(float);
         Bind();
         SetData(size, data, BufferUsageHint.StaticDraw);
-        // Unbind();
     }
-    
 }
