@@ -2,6 +2,7 @@
 using Gamex.Loader;
 using Gamex.Model;
 using Gamex.Program;
+using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -12,6 +13,7 @@ namespace Gamex;
 
 public class Game : GameWindow
 {
+    private ImGuiController _controller;
     private GlProgram? _program;
     private int _rotationMatrixLocation;
     private int _matUniform;
@@ -24,12 +26,13 @@ public class Game : GameWindow
     private ObjectModel? _model;
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
-        new NativeWindowSettings { Size = (width, height), Title = title })
+        new NativeWindowSettings { Size = (width, height), Title = title, APIVersion = new Version(3, 3)})
     {
     }
 
     protected override void OnLoad()
     {
+        _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
         GL.Enable(EnableCap.DepthTest);
         GL.DepthFunc(DepthFunction.Less);
         base.OnLoad();
@@ -98,7 +101,11 @@ public class Game : GameWindow
     protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        _controller.Update(this, (float)args.Time);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+        
+        ImGui.ShowDemoWindow();
+        
         Matrix4 rotationMatrix = Matrix4.Identity * Matrix4.CreateRotationX(_rotationX);
         rotationMatrix *= Matrix4.CreateRotationY(_rotationY);
         rotationMatrix *= Matrix4.CreateRotationZ(_rotationZ);
@@ -113,18 +120,34 @@ public class Game : GameWindow
             ConfigMaterial(material);
             GL.DrawElements(PrimitiveType.Triangles, range.Count, DrawElementsType.UnsignedInt, pointer);
         }
+        _controller.Render();
+        ImGuiController.CheckGLError("End of frame");
         SwapBuffers();
+    }
+    
+    protected override void OnMouseWheel(MouseWheelEventArgs e)
+    {
+        base.OnMouseWheel(e);
+        _controller.MouseScroll(e.Offset);
+    }
+    
+    protected override void OnTextInput(TextInputEventArgs e)
+    {
+        base.OnTextInput(e);
+        _controller.PressChar((char)e.Unicode);
     }
 
     protected override void OnResize(ResizeEventArgs e)
     {
         base.OnResize(e);
         GL.Viewport(0, 0, e.Width, e.Height);
+        _controller.WindowResized(ClientSize.X, ClientSize.Y);
     }
 
     protected override void OnUnload()
     {
         base.OnUnload();
         _program?.Dispose();
+        _controller.Dispose();
     }
 }
