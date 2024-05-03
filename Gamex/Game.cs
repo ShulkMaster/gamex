@@ -30,6 +30,8 @@ public class Game : GameWindow
 
     protected override void OnLoad()
     {
+        GL.Enable(EnableCap.DepthTest);
+        GL.DepthFunc(DepthFunction.Less);
         base.OnLoad();
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         var loader = new AssetLoader("Shiba");
@@ -96,7 +98,7 @@ public class Game : GameWindow
     protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
-        GL.Clear(ClearBufferMask.ColorBufferBit);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Matrix4 rotationMatrix = Matrix4.Identity * Matrix4.CreateRotationX(_rotationX);
         rotationMatrix *= Matrix4.CreateRotationY(_rotationY);
         rotationMatrix *= Matrix4.CreateRotationZ(_rotationZ);

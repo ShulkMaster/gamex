@@ -24,13 +24,7 @@ public class ObjectModel
 
   private void FillVbo(LoadResult data)
   {
-    /* OBJ indices are 1 index based, not 0, so we fill with 0s the firsts position,
-     * the extra position is never used, so we saved on recalculating all the indices by -1
-     */
-    const int offset = 1;
     const int perVertex = 3;
-    const int perNormal = 3;
-
     VertexBufferLayout vbl = new();
     vbl.PushFloat(perVertex);
     //vbl.PushFloat(perNormal);
@@ -38,16 +32,15 @@ public class ObjectModel
     // 1 vertex = 3 float
     int vertexCount = data.Vertices.Count;
     // 3 floats per vertex + 3 floats per normal
-    int vertexSize = (vertexCount + offset) * perVertex;
+    int vertexSize = vertexCount * perVertex;
     // int normalsSize = (vertexCount + offset) * perNormal;
     float[] vertexData = new float[vertexSize];
     const int stride = perVertex;
 
-
-    for (int i = 1; i < vertexCount; i++)
+    for (var i = 0; i < vertexCount; i++)
     {
       int index = i * stride;
-      var vertex = data.Vertices[i - 1];
+      var vertex = data.Vertices[i];
       vertexData[index] = vertex.X;
       vertexData[index + 1] = vertex.Y;
       vertexData[index + 2] = vertex.Z;
@@ -103,15 +96,15 @@ public class ObjectModel
     var length = 0;
     foreach (var face in group.Faces)
     {
-      var centralIndex = (uint)face[0].VertexIndex;
+      var centralIndex = (uint)face[0].VertexIndex - 1;
       for (var index = 2; index < face.Count; index++)
       {
         var second = (uint)face[index - 1].VertexIndex;
         var third = (uint)face[index].VertexIndex;
         int position = offset + length + 3 * (index - 2);
         indices[position] = centralIndex;
-        indices[position + 1] = second;
-        indices[position + 2] = third;
+        indices[position + 1] = second - 1;
+        indices[position + 2] = third - 1;
       }
       length += (face.Count - 2) * 3;
     }
