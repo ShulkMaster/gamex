@@ -1,5 +1,6 @@
 ﻿using Gamex.DataObjects;
 using Gamex.Loader;
+using Gamex.Model;
 using Gamex.Program;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -12,15 +13,15 @@ namespace Gamex;
 public class Game : GameWindow
 {
     private GlProgram? _program;
-    private int _vertexArrayObject;
-    private int _elementBufferObject;
-    private int faceCount;
     private int _rotationMatrixLocation;
+    private int _matUniform;
 
-    private float _rotationX = 0;
-    private float _rotationY = 0;
-    private float _rotationZ = 0;
+    private float _rotationX;
+    private float _rotationY;
+    private float _rotationZ;
     private float _scale = 1;
+
+    private ObjectModel? _model;
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title })
@@ -31,7 +32,7 @@ public class Game : GameWindow
     {
         base.OnLoad();
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        var loader = new AssetLoader("Fox");
+        var loader = new AssetLoader("Shiba");
         var stuff = loader.Load();
         var vShader = new VertexShader();
         if (!vShader.Compile("position.vert"))
@@ -51,26 +52,11 @@ public class Game : GameWindow
             .AttachVertex(vShader)
             .AttachFragment(fShader)
             .Build();
-
-        var vbo = new VertexBuffer();
-        VertexPack pack = loader.Pack(stuff);
-        vbo.SetStaticData(pack.Vertices);
-
-        _vertexArrayObject = GL.GenVertexArray();
-        GL.BindVertexArray(_vertexArrayObject);
-        GL.VertexAttribPointer(0, pack.Size, pack.PointerType, false, pack.stride, 0);
-        GL.EnableVertexAttribArray(0);
-
+        _model = new ObjectModel(stuff);
         // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
-        uint[] indices = pack.Indices;
-        faceCount = indices.Length;
-        _elementBufferObject = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices,
-            BufferUsageHint.StaticDraw);
         _program.UseProgram();
         _rotationMatrixLocation = _program.FindUniform("rotationMatrix");
+        _matUniform = _program.FindUniform("material");
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -91,9 +77,6 @@ public class Game : GameWindow
             _rotationZ -= 0.0174533f / 10 * MouseState.Delta.X;
         }
 
-
-        _rotationX = Math.Clamp(temp, -clamp, clamp);
-
         if (MouseState.IsButtonDown(MouseButton.Left))
         {
             _rotationY -= 0.0174533f / 10 * MouseState.Delta.X;
@@ -104,26 +87,36 @@ public class Game : GameWindow
         }
     }
 
+    private void ConfigMaterial(MaterialProp mat)
+    {
+        GL.Uniform3(_matUniform, mat.Ambient);
+        GL.Uniform3(_matUniform + 1, mat.Diffuse);
+    }
+
     protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
         GL.Clear(ClearBufferMask.ColorBufferBit);
-        _program?.UseProgram();
         Matrix4 rotationMatrix = Matrix4.Identity * Matrix4.CreateRotationX(_rotationX);
         rotationMatrix *= Matrix4.CreateRotationY(_rotationY);
         rotationMatrix *= Matrix4.CreateRotationZ(_rotationZ);
         rotationMatrix *= Matrix4.CreateScale(_scale);
 
         GL.UniformMatrix4(_rotationMatrixLocation, false, ref rotationMatrix);
-        GL.BindVertexArray(_vertexArrayObject);
-        GL.DrawElements(PrimitiveType.Triangles, faceCount, DrawElementsType.UnsignedInt, 0);
+        var materials = _model!.Materials;
+        foreach (var material in materials)
+        {
+            var range = material.Range;
+            int pointer = range.Offset * sizeof(uint);
+            ConfigMaterial(material);
+            GL.DrawElements(PrimitiveType.Triangles, range.Count, DrawElementsType.UnsignedInt, pointer);
+        }
         SwapBuffers();
     }
 
     protected override void OnResize(ResizeEventArgs e)
     {
         base.OnResize(e);
-
         GL.Viewport(0, 0, e.Width, e.Height);
     }
 

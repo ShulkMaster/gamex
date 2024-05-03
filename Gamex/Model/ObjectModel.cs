@@ -8,14 +8,13 @@ namespace Gamex.Model;
 
 public class ObjectModel
 {
-  private VertexBuffer vbo;
+  private VertexBuffer _vbo = new();
   private VertexArray vao;
   private ElementArrayBuffer _eao = new();
   private List<MaterialProp> _materials = new();
 
   public ObjectModel(LoadResult data)
   {
-    vbo = new VertexBuffer();
     vao = new VertexArray();
     FillVbo(data);
     FillGroups(data);
@@ -34,15 +33,15 @@ public class ObjectModel
 
     VertexBufferLayout vbl = new();
     vbl.PushFloat(perVertex);
-    vbl.PushFloat(perNormal);
+    //vbl.PushFloat(perNormal);
 
     // 1 vertex = 3 float
     int vertexCount = data.Vertices.Count;
     // 3 floats per vertex + 3 floats per normal
     int vertexSize = (vertexCount + offset) * perVertex;
-    int normalsSize = (vertexCount + offset) * perNormal;
-    float[] vertexData = new float[vertexSize + normalsSize];
-    const int stride = perVertex + perNormal;
+    // int normalsSize = (vertexCount + offset) * perNormal;
+    float[] vertexData = new float[vertexSize];
+    const int stride = perVertex;
 
 
     for (int i = 1; i < vertexCount; i++)
@@ -55,8 +54,8 @@ public class ObjectModel
     }
 
     // the VBO is currently bound
-    vbo.SetStaticData(vertexData);
-    vao.AddBuffer(vbo, vbl);
+    _vbo.SetStaticData(vertexData);
+    vao.AddBuffer(_vbo, vbl);
   }
 
   private void FillGroups(LoadResult data)
@@ -109,7 +108,7 @@ public class ObjectModel
       {
         var second = (uint)face[index - 1].VertexIndex;
         var third = (uint)face[index].VertexIndex;
-        int position = offset + 3 * (index - 2);
+        int position = offset + length + 3 * (index - 2);
         indices[position] = centralIndex;
         indices[position + 1] = second;
         indices[position + 2] = third;
@@ -118,7 +117,10 @@ public class ObjectModel
     }
 
     mat.Range = new MaterialRange { Offset = offset, Count = length };
-    _materials.Add(mat);
+    if (length > 0)
+    {
+      _materials.Add(mat);
+    }
     return length;
   }
 }
