@@ -1,7 +1,6 @@
-﻿using Gamex.Memory;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 
-namespace Gamex.Loader;
+namespace Gamex.Memory;
 
 public class VertexBuffer: GlBuffer
 {
