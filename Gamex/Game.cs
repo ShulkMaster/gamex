@@ -1,4 +1,5 @@
-﻿using Gamex.DataObjects;
+﻿using System.Numerics;
+using Gamex.DataObjects;
 using Gamex.Loader;
 using Gamex.Model;
 using Gamex.Program;
@@ -6,8 +7,8 @@ using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Mathematics;
+using Vector3 = System.Numerics.Vector3;
 
 namespace Gamex;
 
@@ -18,15 +19,15 @@ public class Game : GameWindow
     private int _rotationMatrixLocation;
     private int _matUniform;
 
-    private float _rotationX;
-    private float _rotationY;
-    private float _rotationZ;
+    private Vector3 _translation = new (0f);
+    private Vector3 _rotation = new (0f);
+    private Matrix4 _projectionMatrix = Matrix4.Identity;
     private float _scale = 1;
 
     private ObjectModel? _model;
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
-        new NativeWindowSettings { Size = (width, height), Title = title, APIVersion = new Version(3, 3)})
+        new NativeWindowSettings { Size = (width, height), Title = title, APIVersion = new Version(3, 3), Vsync = VSyncMode.On})
     {
     }
 
@@ -67,29 +68,16 @@ public class Game : GameWindow
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
+        var translation = Matrix4.CreateTranslation(new OpenTK.Mathematics.Vector3(
+            _translation.X,
+            _translation.Y,
+            _translation.Z
+        ));
 
-        if (KeyboardState.IsKeyDown(Keys.Escape))
-        {
-            Close();
-        }
-
-        const float clamp = 6.28f;
-        float temp = _scale + (float)(MouseState.ScrollDelta.Y * 0.01);
-        _scale = Math.Clamp(temp, 0.05f, 2f);
-
-        if (KeyboardState.IsKeyDown(Keys.LeftShift))
-        {
-            _rotationZ -= 0.0174533f / 10 * MouseState.Delta.X;
-        }
-
-        if (MouseState.IsButtonDown(MouseButton.Left))
-        {
-            _rotationY -= 0.0174533f / 10 * MouseState.Delta.X;
-            _rotationY = Math.Clamp(_rotationY, -clamp, clamp);
-
-            _rotationX -= 0.0174533f / 10 * MouseState.Delta.Y;
-            _rotationX = Math.Clamp(_rotationX, -clamp, clamp);
-        }
+        var rotation = Matrix4.CreateRotationX(_rotation.X) 
+                       * Matrix4.CreateRotationY(_rotation.Y)
+                       * Matrix4.CreateRotationZ(_rotation.Z);
+        _projectionMatrix = translation * rotation * Matrix4.CreateScale(_scale);
     }
 
     private void ConfigMaterial(MaterialProp mat)
@@ -103,15 +91,16 @@ public class Game : GameWindow
         base.OnRenderFrame(args);
         _controller.Update(this, (float)args.Time);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-        
-        ImGui.ShowDemoWindow();
-        
-        Matrix4 rotationMatrix = Matrix4.Identity * Matrix4.CreateRotationX(_rotationX);
-        rotationMatrix *= Matrix4.CreateRotationY(_rotationY);
-        rotationMatrix *= Matrix4.CreateRotationZ(_rotationZ);
-        rotationMatrix *= Matrix4.CreateScale(_scale);
 
-        GL.UniformMatrix4(_rotationMatrixLocation, false, ref rotationMatrix);
+        ImGui.Begin("Model position");
+        float fps = ImGui.GetIO().Framerate;
+        ImGui.Text($"FPS {fps}");
+        ImGui.SliderFloat("Scale", ref _scale, 0.05f, 3f);
+        ImGui.SliderFloat3("Translation", ref _translation, -1f, 1f);
+        ImGui.SliderFloat3("Rotation", ref _rotation, -3.1415f, 3.1415f);
+        ImGui.End();
+
+        GL.UniformMatrix4(_rotationMatrixLocation, false, ref _projectionMatrix);
         var materials = _model!.Materials;
         foreach (var material in materials)
         {
