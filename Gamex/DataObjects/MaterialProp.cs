@@ -26,4 +26,15 @@ public class MaterialProp
   {
     Diffuse = new Vector3(r, g, b);
   }
+
+  private string VectorToColor(Vector3 v)
+  {
+    return $"r{v.X} g{v.Y} b{v.Z}";
+  }
+
+  public string Print()
+  {
+    return $"{Name}: Diffuse Kd: ({VectorToColor(Diffuse)}) \n" +
+           $"{Name}: Ambient Ka: ({VectorToColor(Ambient)})";
+  }
 }

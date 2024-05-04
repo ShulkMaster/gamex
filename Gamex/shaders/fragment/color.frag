@@ -20,15 +20,11 @@ out vec4 FragColor;
 
 void main()
 {
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * material.ambient;
-
+    vec3 ambient = material.ambient * light.color;
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.loc - fragPos);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * light.color;
-
-    vec3 result = (ambient + diffuse) * material.diffuse;
-    
+    vec3 diffuse = material.diffuse * light.color * diff;
+    vec3 result = ambient + diffuse;
     FragColor = vec4(result, 1.0f);
 }

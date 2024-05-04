@@ -92,6 +92,8 @@ public class ObjectModel
 
     material.SetAmbient(ambient.X, ambient.Y, ambient.Z);
     material.SetDiffuse(diffuse.X, diffuse.Y, diffuse.Z);
+    
+    Console.WriteLine(material.Print());
     return material;
   }
 
