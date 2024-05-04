@@ -57,13 +57,13 @@ public class LightPanel
   public void Render()
   {
     ImGui.Begin("Light Panel");
-    ImGui.InputText("##lName", ActiveLight.Buffer, PointLight._buffSize);
-
     if (ImGui.ArrowButton("##Prev", ImGuiDir.Left))
     {
       PreviousLight();
     }
 
+    ImGui.SameLine(0, ImGui.GetStyle().ItemInnerSpacing.X * 2);
+    ImGui.InputText("##lName", ActiveLight.Buffer, PointLight._buffSize);
     ImGui.SameLine(0, ImGui.GetStyle().ItemInnerSpacing.X * 2);
 
     if (ImGui.ArrowButton("##Next", ImGuiDir.Right))
@@ -71,6 +71,7 @@ public class LightPanel
       NextLight();
     }
 
+    ImGui.SliderFloat3("Location", ref ActiveLight.Location, -1f, 1f);
     ImGui.End();
   }
 }

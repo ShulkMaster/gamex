@@ -1,6 +1,5 @@
 using System.Numerics;
 using System.Text;
-using ObjLoader.Loader.Data;
 
 namespace Gamex.Model;
 

@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Gamex.DataObjects;
+﻿using Gamex.DataObjects;
 using Gamex.Loader;
 using Gamex.Model;
 using Gamex.Program;
@@ -8,7 +7,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Mathematics;
-using Vector3 = System.Numerics.Vector3;
+using V3 = System.Numerics.Vector3;
 
 namespace Gamex;
 
@@ -16,11 +15,11 @@ public class Game : GameWindow
 {
     private ImGuiController _controller;
     private GlProgram? _program;
+    private UniformLocation _location = new();
     private int _rotationMatrixLocation;
-    private int _matUniform;
 
-    private Vector3 _translation = new (0f);
-    private Vector3 _rotation = new (0f);
+    private V3 _translation = new (0f);
+    private V3 _rotation = new (0f);
     private Matrix4 _projectionMatrix = Matrix4.Identity;
     private float _scale = 1;
 
@@ -41,6 +40,7 @@ public class Game : GameWindow
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         var loader = new AssetLoader("Shiba");
         var stuff = loader.Load();
+        _model = new ObjectModel(stuff);
         var vShader = new VertexShader();
         if (!vShader.Compile("position.vert"))
         {
@@ -59,21 +59,18 @@ public class Game : GameWindow
             .AttachVertex(vShader)
             .AttachFragment(fShader)
             .Build();
-        _model = new ObjectModel(stuff);
         // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
         _program.UseProgram();
+        _location.Config(_program);
         _rotationMatrixLocation = _program.FindUniform("rotationMatrix");
-        _matUniform = _program.FindUniform("material");
+        Console.WriteLine("Material Ambient {0} Material diffuse {1}", _location.MaterialAmbientLoc, _location.MaterialDiffuse);
+        Console.WriteLine("Light Location {0} Light Color {1}", _location.LightLocation, _location.LightColor);
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
-        var translation = Matrix4.CreateTranslation(new OpenTK.Mathematics.Vector3(
-            _translation.X,
-            _translation.Y,
-            _translation.Z
-        ));
+        var translation = Matrix4.CreateTranslation(LinearMath.ToTkVector3(_translation));
 
         var rotation = Matrix4.CreateRotationX(_rotation.X) 
                        * Matrix4.CreateRotationY(_rotation.Y)
@@ -83,8 +80,14 @@ public class Game : GameWindow
 
     private void ConfigMaterial(MaterialProp mat)
     {
-        GL.Uniform3(_matUniform, mat.Ambient);
-        GL.Uniform3(_matUniform + 1, mat.Diffuse);
+        GL.Uniform3(_location.MaterialAmbientLoc, mat.Ambient);
+        GL.Uniform3(_location.MaterialDiffuse, mat.Diffuse);
+    }
+
+    private void ConfigLight(PointLight l)
+    {
+        GL.Uniform3(_location.LightLocation, LinearMath.ToTkVector3(l.Location));
+        GL.Uniform3(_location.LightColor, LinearMath.ToTkVector3(l.Color));
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -103,6 +106,7 @@ public class Game : GameWindow
 
         GL.UniformMatrix4(_rotationMatrixLocation, false, ref _projectionMatrix);
         var materials = _model!.Materials;
+        ConfigLight(_lPanel.ActiveLight);
         foreach (var material in materials)
         {
             var range = material.Range;

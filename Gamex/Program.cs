@@ -1,4 +1,4 @@
 ﻿using Gamex;
 
-using Game game = new(800, 600, "Gamex");
+using Game game = new(1280, 720, "Gamex");
 game.Run();
