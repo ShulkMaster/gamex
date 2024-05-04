@@ -25,6 +25,7 @@ public class Game : GameWindow
     private float _scale = 1;
 
     private ObjectModel? _model;
+    private LightPanel _lPanel = new();
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title, APIVersion = new Version(3, 3), Vsync = VSyncMode.On})
@@ -109,6 +110,7 @@ public class Game : GameWindow
             ConfigMaterial(material);
             GL.DrawElements(PrimitiveType.Triangles, range.Count, DrawElementsType.UnsignedInt, pointer);
         }
+        _lPanel.Render();
         _controller.Render();
         ImGuiController.CheckGLError("End of frame");
         SwapBuffers();
