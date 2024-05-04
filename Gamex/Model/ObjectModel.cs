@@ -25,25 +25,30 @@ public class ObjectModel
   private void FillVbo(LoadResult data)
   {
     const int perVertex = 3;
+    const int perNormal = 3;
     VertexBufferLayout vbl = new();
     vbl.PushFloat(perVertex);
-    //vbl.PushFloat(perNormal);
+    vbl.PushFloat(perNormal);
 
     // 1 vertex = 3 float
     int vertexCount = data.Vertices.Count;
     // 3 floats per vertex + 3 floats per normal
     int vertexSize = vertexCount * perVertex;
-    // int normalsSize = (vertexCount + offset) * perNormal;
-    float[] vertexData = new float[vertexSize];
-    const int stride = perVertex;
+    int normalsSize = vertexCount * perNormal;
+    var vertexData = new float[vertexSize + normalsSize];
+    const int stride = perVertex + perNormal;
 
     for (var i = 0; i < vertexCount; i++)
     {
       int index = i * stride;
       var vertex = data.Vertices[i];
+      var normal = data.Normals[i];
       vertexData[index] = vertex.X;
       vertexData[index + 1] = vertex.Y;
       vertexData[index + 2] = vertex.Z;
+      vertexData[index + 3] = normal.X;
+      vertexData[index + 4] = normal.Y;
+      vertexData[index + 5] = normal.Z;
     }
 
     // the VBO is currently bound
