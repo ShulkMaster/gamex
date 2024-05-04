@@ -4,12 +4,13 @@ layout (location = 1) in vec3 aNormal;
 
 uniform mat4 rotationMatrix;
 
-out vec4 transformedPosition;
+out vec3 fragPos;
 out vec3 Normal;
 
 void main()
 {
-    transformedPosition = rotationMatrix * vec4(aPosition, 1.0);
+    vec4 location = rotationMatrix * vec4(aPosition, 1.0);
     Normal = aNormal;
-    gl_Position = transformedPosition;
+    fragPos = aPosition;
+    gl_Position = location;
 }
