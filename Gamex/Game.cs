@@ -1,7 +1,6 @@
 ﻿using Gamex.DataObjects;
-using Gamex.Loader;
+using Gamex.Mesh;
 using Gamex.Model;
-using Gamex.Program;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -14,7 +13,6 @@ namespace Gamex;
 public class Game : GameWindow
 {
     private ImGuiController _controller;
-    private GlProgram? _program;
     private UniformLocation _location = new();
     private int _rotationMatrixLocation;
 
@@ -22,8 +20,6 @@ public class Game : GameWindow
     private V3 _rotation = new (0f);
     private Matrix4 _projectionMatrix = Matrix4.Identity;
     private float _scale = 1;
-
-    private ObjectModel? _model;
     private LightPanel _lPanel = new();
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
@@ -33,38 +29,13 @@ public class Game : GameWindow
 
     protected override void OnLoad()
     {
+        base.OnLoad();
         _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
         GL.Enable(EnableCap.DepthTest);
         GL.DepthFunc(DepthFunction.Less);
-        base.OnLoad();
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        var loader = new AssetLoader("Shiba");
-        var stuff = loader.Load();
-        _model = new ObjectModel(stuff);
-        var vShader = new VertexShader();
-        if (!vShader.Compile("position.vert"))
-        {
-            Console.Error.WriteLine(vShader.InfoLog);
-            return;
-        }
-
-        var fShader = new FragmentShader();
-        if (!fShader.Compile("color.frag"))
-        {
-            Console.Error.WriteLine(fShader.InfoLog);
-            return;
-        }
-
-        _program = new GlProgramBuilder()
-            .AttachVertex(vShader)
-            .AttachFragment(fShader)
-            .Build();
+        CubeMesh.Initialize();
         // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-        _program.UseProgram();
-        _location.Config(_program);
-        _rotationMatrixLocation = _program.FindUniform("rotationMatrix");
-        Console.WriteLine("Material Ambient {0} Material diffuse {1}", _location.MaterialAmbientLoc, _location.MaterialDiffuse);
-        Console.WriteLine("Light Location {0} Light Color {1}", _location.LightLocation, _location.LightColor);
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -105,15 +76,7 @@ public class Game : GameWindow
         ImGui.End();
 
         GL.UniformMatrix4(_rotationMatrixLocation, false, ref _projectionMatrix);
-        var materials = _model!.Materials;
         ConfigLight(_lPanel.ActiveLight);
-        foreach (var material in materials)
-        {
-            var range = material.Range;
-            int pointer = range.Offset * sizeof(uint);
-            ConfigMaterial(material);
-            GL.DrawElements(PrimitiveType.Triangles, range.Count, DrawElementsType.UnsignedInt, pointer);
-        }
         _lPanel.Render();
         _controller.Render();
         ImGuiController.CheckGLError("End of frame");
@@ -142,7 +105,7 @@ public class Game : GameWindow
     protected override void OnUnload()
     {
         base.OnUnload();
-        _program?.Dispose();
         _controller.Dispose();
+        CubeMesh.Clear();
     }
 }

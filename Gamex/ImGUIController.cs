@@ -36,6 +36,7 @@ namespace Gamex
 
         private int GLVersion;
         private bool CompatibilityProfile;
+        private readonly Array _keyCodes = Enum.GetValues(typeof(Keys));
 
         /// <summary>
         /// Constructs a new ImGuiController.
@@ -259,7 +260,7 @@ void main()
             var point = screenPoint;//wnd.PointToClient(screenPoint);
             io.MousePos = new System.Numerics.Vector2(point.X, point.Y);
 
-            foreach (Keys key in Enum.GetValues(typeof(Keys)))
+            foreach (Keys key in _keyCodes)
             {
                 if (key == Keys.Unknown)
                 {
