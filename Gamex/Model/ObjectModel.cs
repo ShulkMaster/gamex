@@ -53,7 +53,7 @@ public class ObjectModel
 
     // the VBO is currently bound
     _vbo.SetStaticData(vertexData);
-    vao.AddBuffer(_vbo, vbl);
+    vao.AddBuffer(vbl);
   }
 
   private void FillGroups(LoadResult data)

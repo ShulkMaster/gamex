@@ -28,14 +28,14 @@ public abstract class Shader: IDisposable
 
     private string GetShaderPath(string fileName)
     {
-        string shaderKind = _type switch
+        string ext = _type switch
         {
-            ShaderType.VertexShader => "vertex",
-            ShaderType.FragmentShader => "fragment",
+            ShaderType.VertexShader => "vert",
+            ShaderType.FragmentShader => "frag",
             _ => throw new ArgumentOutOfRangeException(nameof(fileName), "Unsupported shader type")
         };
 
-        return Path.Combine(ShaderDir, shaderKind, fileName);
+        return Path.Combine(ShaderDir, fileName, $"{fileName}.{ext}");
     }
     
     public int GetHandle() => _handle;
@@ -52,7 +52,7 @@ public abstract class Shader: IDisposable
         return status == 1;
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (_disposed) return;
         GL.DeleteShader(_handle);

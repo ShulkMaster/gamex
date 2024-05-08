@@ -16,7 +16,7 @@ public class VertexArray
     GL.BindVertexArray(handle);
   }
 
-  public void AddBuffer(VertexBuffer vb, VertexBufferLayout layout)
+  public void AddBuffer(VertexBufferLayout layout)
   {
     var elements = layout.Elements;
     var offset = 0;
