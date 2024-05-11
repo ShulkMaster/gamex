@@ -36,7 +36,7 @@ namespace Gamex
 
         private int GLVersion;
         private bool CompatibilityProfile;
-        private readonly Array _keyCodes = Enum.GetValues(typeof(Keys));
+        private readonly Keys[] _keyCodes;
 
         /// <summary>
         /// Constructs a new ImGuiController.
@@ -45,6 +45,7 @@ namespace Gamex
         {
             _windowWidth = width;
             _windowHeight = height;
+            _keyCodes = Enum.GetValues(typeof(Keys)).Cast<Keys>().ToArray();
 
             int major = GL.GetInteger(GetPName.MajorVersion);
             int minor = GL.GetInteger(GetPName.MinorVersion);
@@ -259,6 +260,11 @@ void main()
             var screenPoint = new Vector2i((int)MouseState.X, (int)MouseState.Y);
             var point = screenPoint;//wnd.PointToClient(screenPoint);
             io.MousePos = new System.Numerics.Vector2(point.X, point.Y);
+
+            for (var i = 0; i < _keyCodes.Length; i++)
+            {
+                Keys key = _keyCodes[i];
+            }
 
             foreach (Keys key in _keyCodes)
             {

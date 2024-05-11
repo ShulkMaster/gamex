@@ -1,6 +1,8 @@
-using System.Numerics;
+using Gamex.Mesh;
 using Gamex.Model;
 using ImGuiNET;
+using OpenTK.Mathematics;
+using Vector3 = System.Numerics.Vector3;
 
 namespace Gamex.DataObjects;
 
@@ -11,12 +13,9 @@ public class LightPanel
 
   public IList<PointLight> Lights => _lights;
 
-  public PointLight ActiveLight => _lights[_activeLight];
+  public bool IsOn = true;
 
-  public LightPanel()
-  {
-    _lights.Add(new PointLight());
-  }
+  public PointLight ActiveLight => _lights[_activeLight];
 
   public void AddLight(Vector3 loc, Vector3? c = null)
   {
@@ -50,12 +49,13 @@ public class LightPanel
     _activeLight--;
   }
 
-  public void ReplaceLight(PointLight l, int index)
+  public void Render(Matrix4 proj)
   {
-  }
-
-  public void Render()
-  {
+    CubeMesh.Program.UseProgram();
+    foreach (var light in _lights)
+    {
+      light.Render(proj);
+    }
     ImGui.Begin("Light Panel");
     if (ImGui.ArrowButton("##Prev", ImGuiDir.Left))
     {

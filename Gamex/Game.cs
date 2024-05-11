@@ -1,6 +1,5 @@
 ﻿using Gamex.DataObjects;
 using Gamex.Mesh;
-using Gamex.Model;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -13,13 +12,10 @@ namespace Gamex;
 public class Game : GameWindow
 {
     private ImGuiController _controller;
-    private UniformLocation _location = new();
-    private int _rotationMatrixLocation;
 
     private V3 _translation = new (0f);
     private V3 _rotation = new (0f);
-    private Matrix4 _projectionMatrix = Matrix4.Identity;
-    private float _scale = 1;
+    private readonly Matrix4 _projectionMatrix = Matrix4.CreatePerspectiveOffCenter(-1f, 1f, -1f, 1f, 0.1f, 3f);
     private LightPanel _lPanel = new();
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
@@ -35,30 +31,17 @@ public class Game : GameWindow
         GL.DepthFunc(DepthFunction.Less);
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         CubeMesh.Initialize();
+        _lPanel.AddLight(V3.Zero);
+        _lPanel.AddLight(V3.Zero);
+        _lPanel.AddLight(V3.Zero);
+        _lPanel.Lights[0].Location = new System.Numerics.Vector3(0.5f, 0.5f, 0.5f);
         // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-    }
-
-    protected override void OnUpdateFrame(FrameEventArgs args)
-    {
-        base.OnUpdateFrame(args);
-        var translation = Matrix4.CreateTranslation(LinearMath.ToTkVector3(_translation));
-
-        var rotation = Matrix4.CreateRotationX(_rotation.X) 
-                       * Matrix4.CreateRotationY(_rotation.Y)
-                       * Matrix4.CreateRotationZ(_rotation.Z);
-        _projectionMatrix = translation * rotation * Matrix4.CreateScale(_scale);
     }
 
     private void ConfigMaterial(MaterialProp mat)
     {
-        GL.Uniform3(_location.MaterialAmbientLoc, mat.Ambient);
-        GL.Uniform3(_location.MaterialDiffuse, mat.Diffuse);
-    }
-
-    private void ConfigLight(PointLight l)
-    {
-        GL.Uniform3(_location.LightLocation, LinearMath.ToTkVector3(l.Location));
-        GL.Uniform3(_location.LightColor, LinearMath.ToTkVector3(l.Color));
+        // GL.Uniform3(_location.MaterialAmbientLoc, mat.Ambient);
+        // GL.Uniform3(_location.MaterialDiffuse, mat.Diffuse);
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -66,18 +49,16 @@ public class Game : GameWindow
         base.OnRenderFrame(args);
         _controller.Update(this, (float)args.Time);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+        _lPanel.Render(_projectionMatrix);
 
         ImGui.Begin("Model position");
         float fps = ImGui.GetIO().Framerate;
         ImGui.Text($"FPS {fps}");
-        ImGui.SliderFloat("Scale", ref _scale, 0.05f, 3f);
+        //ImGui.SliderFloat("Scale", ref _scale, 0.05f, 3f);
         ImGui.SliderFloat3("Translation", ref _translation, -1f, 1f);
         ImGui.SliderFloat3("Rotation", ref _rotation, -3.1415f, 3.1415f);
         ImGui.End();
 
-        GL.UniformMatrix4(_rotationMatrixLocation, false, ref _projectionMatrix);
-        ConfigLight(_lPanel.ActiveLight);
-        _lPanel.Render();
         _controller.Render();
         ImGuiController.CheckGLError("End of frame");
         SwapBuffers();

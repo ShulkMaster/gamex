@@ -9,10 +9,11 @@ public class CubeMesh
 {
   private VertexBuffer _vbo = new();
   private VertexArray _vao = new();
-  private static GlProgram _program = null!;
+  public static GlProgram Program = null!;
   private static int _projMatUniform;
-  private Vector3 _loc = new ();
-  private float _scale = 0.5f;
+  private static int _colorUniform;
+  public Vector3 Loc = new ();
+  public float Scale = 0.5f;
 
   public CubeMesh()
   {
@@ -39,31 +40,38 @@ public class CubeMesh
       return false;
     }
 
-    _program = new GlProgramBuilder()
+    Program = new GlProgramBuilder()
       .AttachVertex(vs)
       .AttachFragment(fs)
       .Build();
 
-    _projMatUniform = _program.FindUniform("projectionM");
+    _projMatUniform = Program.FindUniform("projectionM");
+    _colorUniform = Program.FindUniform("color");
     vs.Dispose();
     fs.Dispose();
     return true;
   }
 
-  public void Render(Matrix4 proj)
+  public void Render(Matrix4 proj, Vector3 color)
   {
-    var mat = Matrix4.CreateScale(_scale);
-    mat = Matrix4.CreateTranslation(_loc) * mat;
+    var mat = Matrix4.CreateScale(Scale);
+    mat = Matrix4.CreateTranslation(Loc) * mat;
     mat = proj * mat;
-    _program.UseProgram();
     GL.UniformMatrix4(_projMatUniform, false, ref mat);
+    GL.Uniform3(_colorUniform, color);
     _vao.Bind();
     GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length);
+  }
+  
+  private void ConfigLight()
+  {
+    // GL.Uniform3(_location.LightLocation, LinearMath.ToTkVector3(l.Location));
+    // GL.Uniform3(_location.LightColor, LinearMath.ToTkVector3(l.Color));
   }
 
   public static void Clear()
   {
-    _program.Dispose();
+    Program.Dispose();
   }
 
   private readonly float[] _vertices = {
