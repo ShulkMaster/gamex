@@ -13,11 +13,10 @@ namespace Gamex;
 public class Game : GameWindow
 {
     private ImGuiController _controller;
-    private Vector3 _translation = new (0f);
     private Vector3 _rotation = new (0f);
     private readonly Matrix4 _projectionMatrix = Matrix4.CreatePerspectiveOffCenter(-1f, 1f, -1f, 1f, 0.1f, 3f);
     private Vector3 _camLoc = new (0f, 0f, 2f); 
-    private readonly Vector3 _camTarget = new (0f, 0f, -1f); 
+    private Vector3 _camTarget = new (0f, 0f, -1f); 
     private readonly LightPanel _lPanel = new();
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
@@ -48,8 +47,7 @@ public class Game : GameWindow
 
     protected override void OnKeyDown(KeyboardKeyEventArgs e)
     {
-        const float rotationSpeed = 0.1f;
-        const float walkSpeed = 0.1f;
+        var walkSpeed = (float)(2.3d * RenderTime);
         base.OnKeyDown(e);
         switch (e.Key)
         {
@@ -64,14 +62,39 @@ public class Game : GameWindow
                 break;
             case Keys.A:
                 _camLoc -= Vector3.Cross(_camTarget, Vector3.UnitY).Normalized() * walkSpeed;
-                return;
+                break;
             case Keys.E:
-                _camLoc.Y += -walkSpeed;
-                return;
+                _camLoc -= walkSpeed * Vector3.UnitY;
+                break;
             case Keys.Q:
-                _camLoc.Y += walkSpeed;
-                return;
+                _camLoc += walkSpeed * Vector3.UnitY;
+                break;
         }
+        
+        float rotationSpeed = 0.05f;
+        switch (e.Key)
+        {
+            case Keys.Up:
+                _rotation.Y = Math.Clamp(rotationSpeed + _rotation.Y, -3.14f, 3.14f);
+                break;
+            case Keys.Down:
+                _rotation.Y = Math.Clamp(_rotation.Y - rotationSpeed, -3.14f, 3.14f);
+                break;
+            case Keys.Left:
+                _rotation.X = Math.Clamp(_rotation.X + rotationSpeed, -3.14f, 3.14f);
+                break;
+            case Keys.Right:
+                _rotation.X = Math.Clamp(_rotation.X - rotationSpeed, -3.14f, 3.14f);
+                break;
+        }
+
+        var direction = new Vector3
+        {
+            X = (float)(Math.Cos(_rotation.X) * Math.Cos(_rotation.Y)),
+            Z = (float)(Math.Sin(_rotation.X) * Math.Cos(_rotation.Y)),
+            Y = (float)Math.Sin(_rotation.Y)
+        };
+        _camTarget = direction.Normalized();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
