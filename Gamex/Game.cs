@@ -14,7 +14,7 @@ public class Game : GameWindow
 {
     private ImGuiController _controller;
     private Vector3 _rotation = new (0f);
-    private readonly Matrix4 _projectionMatrix = Matrix4.CreatePerspectiveOffCenter(-1f, 1f, -1f, 1f, 0.1f, 3f);
+    private readonly Matrix4 _projectionMatrix = Matrix4.CreatePerspectiveOffCenter(-1f, 1f, -1f, 1f, 1f, 9f);
     private Vector3 _camLoc = new (0f, 0f, 2f); 
     private Vector3 _camTarget = new (0f, 0f, -1f); 
     private readonly LightPanel _lPanel = new();
@@ -47,7 +47,7 @@ public class Game : GameWindow
 
     protected override void OnKeyDown(KeyboardKeyEventArgs e)
     {
-        var walkSpeed = (float)(2.3d * RenderTime);
+        var walkSpeed = (float)(4d * RenderTime);
         base.OnKeyDown(e);
         switch (e.Key)
         {
@@ -104,7 +104,7 @@ public class Game : GameWindow
         _controller.Update(this, (float)args.Time);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
         // var mat = Matrix4.CreateRotationY(_rotation.Y) * Matrix4.CreateRotationX(_rotation.X); 
-        _lPanel.Render(view);
+        _lPanel.Render(view, _projectionMatrix);
 
         ImGui.Begin("Info");
         float fps = ImGui.GetIO().Framerate;

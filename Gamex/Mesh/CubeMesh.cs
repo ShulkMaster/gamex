@@ -13,7 +13,7 @@ public class CubeMesh
   private static int _projMatUniform;
   private static int _colorUniform;
   public Vector3 Loc = new ();
-  public float Scale = 0.2f;
+  public float Scale = 1f;
 
   public CubeMesh()
   {
@@ -52,11 +52,11 @@ public class CubeMesh
     return true;
   }
 
-  public void Render(Matrix4 view, Vector3 color)
+  public void Render(Matrix4 proj, Matrix4 view, Vector3 color)
   {
     var mat = Matrix4.CreateScale(Scale);
     mat = Matrix4.CreateTranslation(Loc) * mat;
-    mat = view * mat;
+    mat = mat * view * proj;
     GL.UniformMatrix4(_projMatUniform, false, ref mat);
     GL.Uniform3(_colorUniform, color);
     _vao.Bind();

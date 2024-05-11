@@ -49,12 +49,12 @@ public class LightPanel
     _activeLight--;
   }
 
-  public void Render(Matrix4 view)
+  public void Render(Matrix4 view, Matrix4 proj)
   {
     CubeMesh.Program.UseProgram();
     foreach (var light in _lights)
     {
-      light.Render(view);
+      light.Render(view, proj);
     }
     ImGui.Begin("Light Panel");
     if (ImGui.ArrowButton("##Prev", ImGuiDir.Left))
