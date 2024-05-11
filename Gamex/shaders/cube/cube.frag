@@ -2,8 +2,11 @@
 
 uniform vec3 color;
 
+in vec3 Normal;
+
 out vec4 FragColor;
 
 void main() {
-    FragColor = vec4(color, 1);
+    vec3 n = abs(normalize(Normal));
+    FragColor = vec4(n, 1);
 }

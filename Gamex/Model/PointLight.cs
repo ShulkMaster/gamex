@@ -28,9 +28,9 @@ public class PointLight
 
   public byte[] Buffer => _buffer;
 
-  public void Render(Matrix4 proj)
+  public void Render(Matrix4 view)
   {
     _m.Loc = LinearMath.ToTkVector3(Location);
-    _m.Render(proj, LinearMath.ToTkVector3(Color));
+    _m.Render(view, LinearMath.ToTkVector3(Color));
   }
 }
