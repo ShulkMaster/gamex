@@ -70,7 +70,8 @@ public class GraphicObject: SceneObject
       GL.Uniform3(_uniMaterialAm, material.Ambient);
       GL.Uniform3(_uniMaterialDiff, material.Diffuse);
       var r = material.Range;
-      GL.DrawArrays(PrimitiveType.Triangles, r.Offset, r.Count);
+      int pointer = r.Offset * sizeof(uint);
+      GL.DrawElements(PrimitiveType.Triangles, r.Count, DrawElementsType.UnsignedInt, pointer);
     }
   }
 }

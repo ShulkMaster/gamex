@@ -40,7 +40,7 @@ public class Game : GameWindow
         AssetLoader loader = new ("Shiba");
         var result = loader.Load();
         var mesh = MeshLoader.LoadMesh(result);
-        mesh.Materials = MaterialLoader.LoadMaterials(result);
+        mesh.Materials = MaterialLoader.LoadMaterials(result, mesh.Eao);
         var element = new GraphicObject(mesh);
         _objects.Add(element);
         _lPanel.AddLight(new V3(1f, 0f, 0.5f));

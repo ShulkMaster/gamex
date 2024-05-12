@@ -16,6 +16,7 @@ public sealed class ObjectMesh
 
   public VertexBuffer Vbo { get; } = new();
   public VertexArray Vao = new();
+  public ElementArrayBuffer Eao = new();
   public List<MaterialProp> Materials = new();
 
   public bool HasNormal => _normals;

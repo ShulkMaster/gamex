@@ -1,4 +1,5 @@
 using Gamex.DataObjects;
+using Gamex.Memory;
 using ObjLoader.Loader.Data;
 using ObjLoader.Loader.Data.Elements;
 using ObjLoader.Loader.Loaders;
@@ -59,7 +60,7 @@ public static class MaterialLoader
     return material;
   }
 
-  public static List<MaterialProp> LoadMaterials(LoadResult data)
+  public static List<MaterialProp> LoadMaterials(LoadResult data, ElementArrayBuffer eao)
   {
     var materials = new List<MaterialProp>();
     uint[] indices = AllocateIndex(data);
@@ -75,6 +76,7 @@ public static class MaterialLoader
       }
       offset += lenght;
     }
+    eao.SetStaticData(indices);
 
     return materials;
   }
