@@ -90,8 +90,8 @@ public class ObjectModel
     var ambient = mat.AmbientColor;
     var diffuse = mat.DiffuseColor;
 
-    material.SetAmbient(ambient.X, ambient.Y, ambient.Z);
-    material.SetDiffuse(diffuse.X, diffuse.Y, diffuse.Z);
+    material.Ambient = LinearMath.ToTkVector3(ambient);
+    material.Diffuse = LinearMath.ToTkVector3(diffuse);
     
     Console.WriteLine(material.Print());
     return material;
