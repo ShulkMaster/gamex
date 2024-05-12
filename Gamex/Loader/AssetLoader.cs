@@ -25,40 +25,6 @@ public sealed class AssetLoader : IMaterialStreamProvider
         return result;
     }
 
-    public VertexPack Pack(LoadResult res)
-    {
-        var vertex = res.Vertices;
-        float[] vertices = new float[vertex.Count * 3];
-
-        for (int i = 0; i < vertex.Count; i++)
-        {
-            vertices[i * 3] = vertex[i].X;
-            vertices[i * 3 + 1] = vertex[i].Y;
-            vertices[i * 3 + 2] = vertex[i].Z;
-        }
-
-        var indices = new List<uint>();
-        var groups = res.Groups;
-
-        foreach (Group t in groups)
-        {
-            Console.WriteLine("Group: {0}", t.Name);
-            foreach (Face face in t.Faces)
-            {
-                var centralIndex = (uint) face[0].VertexIndex - 1;
-                for (int index = 2; index < face.Count; index++)
-                {
-                    var second = (uint) face[index - 1].VertexIndex - 1;
-                    var third = (uint)face[index].VertexIndex - 1;
-                    indices.Add(centralIndex);
-                    indices.Add(second);
-                    indices.Add(third);
-                }
-            }
-        }
-        return new VertexPack(vertices, indices.ToArray());
-    }
-
     public Stream Open(string materialFilePath)
     {
         string path = Path.Combine(AssetPath, _assetName, materialFilePath);
