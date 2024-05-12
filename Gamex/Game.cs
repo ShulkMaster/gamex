@@ -1,4 +1,6 @@
 ﻿using Gamex.DataObjects;
+using Gamex.Entity;
+using Gamex.Loader;
 using Gamex.Mesh;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
@@ -18,6 +20,7 @@ public class Game : GameWindow
     private Vector3 _camLoc = new (0f, 0f, 2f); 
     private Vector3 _camTarget = new (0f, 0f, -1f); 
     private readonly LightPanel _lPanel = new();
+    private readonly List<GraphicObject> _objects = new();
 
     public Game(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings { Size = (width, height), Title = title, APIVersion = new Version(3, 3), Vsync = VSyncMode.On})
@@ -27,22 +30,20 @@ public class Game : GameWindow
     protected override void OnLoad()
     {
         base.OnLoad();
-        _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
         GL.Enable(EnableCap.DepthTest);
         GL.DepthFunc(DepthFunction.Less);
-        GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        GL.ClearColor(0f, 0f, 0f, 1f);
+        _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
         CubeMesh.Initialize();
-        _lPanel.AddLight(V3.Zero);
-        _lPanel.AddLight(V3.Zero);
-        _lPanel.AddLight(V3.Zero);
-        _lPanel.Lights[0].Location = new System.Numerics.Vector3(0.5f, 0.5f, 0.5f);
-        // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-    }
+        GraphicObject.Initialize();
 
-    private void ConfigMaterial(MaterialProp mat)
-    {
-        // GL.Uniform3(_location.MaterialAmbientLoc, mat.Ambient);
-        // GL.Uniform3(_location.MaterialDiffuse, mat.Diffuse);
+        AssetLoader loader = new ("Shiba");
+        var result = loader.Load();
+        var mesh = MeshLoader.LoadMesh(result);
+        mesh.Materials = MaterialLoader.LoadMaterials(result);
+        var element = new GraphicObject(mesh);
+        _objects.Add(element);
+        _lPanel.AddLight(new V3(1f, 0f, 0.5f));
     }
 
     protected override void OnKeyDown(KeyboardKeyEventArgs e)
@@ -103,8 +104,12 @@ public class Game : GameWindow
         var view = Matrix4.LookAt(_camLoc, _camLoc + _camTarget, Vector3.UnitY);
         _controller.Update(this, (float)args.Time);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-        // var mat = Matrix4.CreateRotationY(_rotation.Y) * Matrix4.CreateRotationX(_rotation.X); 
         _lPanel.Render(view, _projectionMatrix);
+        GraphicObject.Program.UseProgram();
+        foreach (var graphicObject in _objects)
+        {
+            graphicObject.Render(view, _projectionMatrix, _lPanel.ActiveLight);
+        }
 
         ImGui.Begin("Info");
         float fps = ImGui.GetIO().Framerate;

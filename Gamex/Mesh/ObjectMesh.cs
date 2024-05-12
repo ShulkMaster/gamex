@@ -5,8 +5,14 @@ namespace Gamex.Mesh;
 
 public sealed class ObjectMesh
 {
-  private bool _normals;
-  private bool _textCoords;
+  private readonly bool _normals;
+  private readonly bool _textCoords;
+
+  public ObjectMesh(bool n, bool t)
+  {
+    _normals = n;
+    _textCoords = t;
+  }
 
   public VertexBuffer Vbo { get; } = new();
   public VertexArray Vao = new();
