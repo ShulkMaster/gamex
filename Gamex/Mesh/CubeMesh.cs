@@ -13,7 +13,7 @@ public class CubeMesh
   private static int _projMatUniform;
   private static int _colorUniform;
   public Vector3 Loc = new ();
-  public float Scale = 1f;
+  public float Scale = 0.08f;
 
   public CubeMesh()
   {

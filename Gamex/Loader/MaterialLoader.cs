@@ -66,8 +66,6 @@ public static class MaterialLoader
     var offset = 0;
     foreach (var group in data.Groups)
     {
-      string? matName = group.Material?.Name;
-      Console.WriteLine("Group {0} made of {1}", group.Name,  matName ?? "Default");
       int lenght = FillMaterial(group, offset, indices);
       if (lenght > 0)
       {

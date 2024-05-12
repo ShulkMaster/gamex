@@ -10,12 +10,11 @@ public class PointLight
 {
   public const uint _buffSize = 256;
   private readonly byte[] _buffer = new byte[_buffSize];
-  private CubeMesh _m = new();
+  public CubeMesh _m = new();
 
   public string Name => Encoding.UTF8.GetString(_buffer);
   public Vector3 Location = Vector3.Zero;
   public Vector3 Color = Vector3.One;
-  public float Scale => _m.Scale;
 
   public PointLight()
   {
