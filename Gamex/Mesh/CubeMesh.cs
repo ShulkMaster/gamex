@@ -54,9 +54,7 @@ public class CubeMesh
 
   public void Render(Matrix4 proj, Matrix4 view, Vector3 color)
   {
-    var mat = Matrix4.CreateScale(Scale);
-    mat = Matrix4.CreateTranslation(Loc) * mat;
-    mat = mat * view * proj;
+    var mat = proj * view;
     GL.UniformMatrix4(_projMatUniform, false, ref mat);
     GL.Uniform3(_colorUniform, color);
     _vao.Bind();

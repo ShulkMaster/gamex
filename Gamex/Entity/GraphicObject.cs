@@ -11,7 +11,10 @@ public class GraphicObject: SceneObject
 {
   private readonly ObjectMesh _mesh;
   public static GlProgram Program;
-  private static int _projMatUniform;
+  private static int _uniMatProj;
+  private static int _uniMatView;
+  private static int _uniMatModel;
+  private static int _uniMatInvertModel;
   private static int _uniMaterialAm;
   private static int _uniMaterialDiff;
   private static int _uniLLoc;
@@ -41,7 +44,10 @@ public class GraphicObject: SceneObject
       .AttachFragment(fs)
       .Build();
     
-    _projMatUniform = Program.FindUniform("projection");
+    _uniMatProj = Program.FindUniform("projection");
+    _uniMatView = Program.FindUniform("view");
+    _uniMatModel = Program.FindUniform("model");
+    _uniMatInvertModel = Program.FindUniform("invertModel");
     _uniMaterialAm = Program.FindUniform("material.ambient");
     _uniMaterialDiff = Program.FindUniform("material.diffuse");
     _uniLLoc = Program.FindUniform("light.loc");
@@ -58,10 +64,16 @@ public class GraphicObject: SceneObject
 
   public void Render(Matrix4 view, Matrix4 proj, PointLight l)
   {
-    var mat = Matrix4.CreateScale(Scale);
-    mat = Matrix4.CreateTranslation(LinearMath.ToTkVector3(Location)) * mat;
-    mat = mat * view * proj;
-    GL.UniformMatrix4(_projMatUniform, false, ref mat);
+    var model = Matrix4.Identity;
+    model *= Matrix4.CreateScale(Scale);
+    model *= Matrix4.CreateTranslation(Location.X, Location.Y, Location.Z);
+    GL.UniformMatrix4(_uniMatProj, false, ref proj);
+    GL.UniformMatrix4(_uniMatView, false, ref view);
+    GL.UniformMatrix4(_uniMatModel, false, ref model);
+    var inverse = Matrix4.Invert(model);
+    inverse.Transpose();
+    var normalInvert = new Matrix3(inverse);
+    GL.UniformMatrix3(_uniMatInvertModel, false, ref normalInvert);
     GL.Uniform3(_uniLLoc, LinearMath.ToTkVector3(l.Location));
     GL.Uniform3(_uniLcolor, LinearMath.ToTkVector3(l.Color));
     _mesh.Vao.Bind();

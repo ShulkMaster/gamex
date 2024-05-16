@@ -144,6 +144,7 @@ public class Game : GameWindow
     {
         base.OnUnload();
         _controller.Dispose();
+        GraphicObject.Program.Dispose();
         CubeMesh.Clear();
     }
 }
