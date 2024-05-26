@@ -71,7 +71,7 @@ public class LightPanel
       NextLight();
     }
 
-    ImGui.SliderFloat3("Location", ref ActiveLight.Location, -10f, 10f);
+    ImGui.SliderFloat3("Location", ref ActiveLight.Location, -20f, 20f);
     ImGui.SliderFloat("Scale", ref ActiveLight._m.Scale, .02f, 1f);
     ImGui.End();
   }

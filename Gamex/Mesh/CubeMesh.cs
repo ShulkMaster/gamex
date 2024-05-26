@@ -11,9 +11,11 @@ public class CubeMesh
   private VertexArray _vao = new();
   public static GlProgram Program = null!;
   private static int _projMatUniform;
+  private static int _uniViewMat;
+  private static int _uniModelMat;
   private static int _colorUniform;
   public Vector3 Loc = new ();
-  public float Scale = 0.08f;
+  public float Scale = 1f;
 
   public CubeMesh()
   {
@@ -54,8 +56,11 @@ public class CubeMesh
 
   public void Render(Matrix4 proj, Matrix4 view, Vector3 color)
   {
-    var mat = proj * view;
-    GL.UniformMatrix4(_projMatUniform, false, ref mat);
+    var model = Matrix4.CreateScale(Scale);
+    model *= Matrix4.CreateTranslation(Loc);
+    GL.UniformMatrix4(_projMatUniform, false, ref proj);
+    GL.UniformMatrix4(_uniViewMat, false, ref view);
+    GL.UniformMatrix4(_uniViewMat, false, ref model);
     GL.Uniform3(_colorUniform, color);
     _vao.Bind();
     GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length);

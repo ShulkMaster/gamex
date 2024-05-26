@@ -3,8 +3,9 @@ layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec3 aNormal;
 
 uniform mat4 projectionM;
+uniform mat4 view;
+uniform mat4 model;
 
 void main() {
-    vec4 location = projectionM * vec4(aPosition, 1.0);
-    gl_Position = location;
+    gl_Position = projectionM * view * model * vec4(aPosition, 1.0);
 }

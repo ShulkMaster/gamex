@@ -13,7 +13,7 @@ out vec3 Normal;
 void main()
 {
     Normal = invertModel * aNormal;
-    vec4 temp = view * vec4(aPosition, 1.0);
+    vec4 temp = model * vec4(aPosition, 1.0);
     fragPos = temp.xyz;
-    gl_Position = projection * view * vec4(aPosition, 1.0);
+    gl_Position = projection * view * model * vec4(aPosition, 1.0);
 }
